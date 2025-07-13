@@ -30,6 +30,34 @@ export default function RootLayout({
             document.head.appendChild(usp);
           `}
         </Script>
+        <Script id="utmify-purchase-event" strategy="afterInteractive">
+          {`
+            window.addEventListener("DOMContentLoaded", function () {
+              const params = new URLSearchParams(window.location.search);
+              const valor = parseFloat(params.get("valor"));
+
+              if (!isNaN(valor) && typeof window.utmify === 'function') {
+                window.utmify('event', 'purchase', {
+                  value: valor,
+                  currency: 'BRL'
+                });
+                console.log("UTMify purchase enviado com valor:", valor);
+              } else if (!isNaN(valor)) {
+                // If utmify is not ready, wait for it.
+                window.addEventListener('utmify:ready', function() {
+                  window.utmify('event', 'purchase', {
+                    value: valor,
+                    currency: 'BRL'
+                  });
+                   console.log("UTMify purchase enviado com valor (atrasado):", valor);
+                });
+              }
+              else {
+                console.warn("Parâmetro 'valor' inválido ou pixel UTMify não foi carregado ainda.");
+              }
+            });
+          `}
+        </Script>
       </head>
       <body className="font-body antialiased">
         {children}
