@@ -82,6 +82,29 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
+        {/* Script para disparar o evento de compra com valor dinâmico */}
+        <Script id="fb-purchase-event" strategy="lazyOnload">
+          {`
+            function getParam(param) {
+              const urlParams = new URLSearchParams(window.location.search);
+              return urlParams.get(param);
+            }
+
+            const valor = parseFloat(getParam('valor')) || 0;
+
+            if (valor > 0) {
+              if (typeof fbq === 'function') {
+                fbq('track', 'Purchase', {
+                  value: valor,
+                  currency: 'BRL'
+                });
+                console.log('Pixel disparado: R$', valor);
+              }
+            } else {
+              console.warn('Valor não encontrado na URL');
+            }
+          `}
+        </Script>
       </body>
     </html>
   );
